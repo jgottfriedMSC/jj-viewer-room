@@ -1,5 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { YouTubePlayer, YouTubePlayerModule } from '@angular/youtube-player';
+import { YouTubePlayer } from '@angular/youtube-player';
 
 @Component({
   selector: 'app-video',
@@ -7,6 +7,7 @@ import { YouTubePlayer, YouTubePlayerModule } from '@angular/youtube-player';
   styleUrls: ['./video.component.css']
 })
 export class VideoComponent implements OnInit {
+
   constructor() { }
   src: string = "GYAB4Td62zI";
   text:string = "Test";
@@ -46,5 +47,4 @@ export class VideoComponent implements OnInit {
   pause(): void{
     this.text = "Erfolgreich";
   }
-
 }

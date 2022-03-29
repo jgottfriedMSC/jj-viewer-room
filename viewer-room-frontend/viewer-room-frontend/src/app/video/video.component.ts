@@ -1,4 +1,5 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
+import { YouTubePlayer, YouTubePlayerModule } from '@angular/youtube-player';
 
 @Component({
   selector: 'app-video',
@@ -6,29 +7,44 @@ import { Component, OnInit } from '@angular/core';
   styleUrls: ['./video.component.css']
 })
 export class VideoComponent implements OnInit {
-
   constructor() { }
-  src: string = "";
-  pausedString: string = "Paused";
-  paused: boolean = true;
-  ytbSrc: string = "https://www.youtube.com/watch?v=Y5SLJde7D0o";
+  src: string = "GYAB4Td62zI";
+  text:string = "Test";
+  input:string = "";
+  @ViewChild(YouTubePlayer) youtubePlayer!: YouTubePlayer ;
   ngOnInit(): void {
   }
+  onStateChange(event: YT.OnStateChangeEvent): void {
+    if (event.data === YT.PlayerState.CUED) {
+    
+    }
+    else if(event.data == YT.PlayerState.PAUSED){
+      this.pause();
+    }
+    else if(event.data == YT.PlayerState.PLAYING){
+      
+    }
+    else if(event.data == YT.PlayerState.ENDED){
+      
+    }
+    else if(event.data == YT.PlayerState.UNSTARTED){
 
+    }
+    else if(event.data == YT.PlayerState.BUFFERING){
+      
+    }
+  }
+  onReady(event: YT.PlayerEvent): void {
+    event.target.playVideo();
+  }
+  onKey(value: string) {
+    this.input = value;
+  }
   getNextVideo(): void{
-    var iframe = document.getElementById('youtubeVideo')?.setAttribute('src',"https://www.youtube.com/embed/Y5SLJde7D0o");
+    this.src = this.input;
   }
-  videoPaused():void{
-    alert("Clicked");
-    if(this.paused){
-      this.paused = false;
-      this.pausedString = "Not Paused";
-    }
-    else{
-      this.paused = true;
-      this.pausedString = "Paused";
-    }
+  pause(): void{
+    this.text = "Erfolgreich";
   }
-  
 
 }

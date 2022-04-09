@@ -7,12 +7,16 @@ import { RxStompService } from './rx-stomp.service';
 import { MessagesComponent } from './messages/messages.component';
 import { VideoComponent } from './video/video.component';
 import { YouTubePlayerModule } from '@angular/youtube-player';
+import { ChatLayoutComponent } from './chat-layout/chat-layout.component';
+import { MessageComponent } from './message/message.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     MessagesComponent,
-    VideoComponent
+    VideoComponent,
+    ChatLayoutComponent,
+    MessageComponent
   ],
   imports: [
     BrowserModule,

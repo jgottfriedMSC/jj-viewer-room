@@ -4,3 +4,21 @@
 .row{
     height: fit-content;
 }
+.ytb{
+    width: 65%;
+    float: left;
+}
+.queu{
+    width: 35%;
+    height: 300px;
+    float: left;
+}
+.inputs{
+    width: 100%;
+    float: right;
+}
+.left{
+    float: left;
+    width: fit-content;
+    margin-left: 10px;
+}

@@ -1,67 +1,89 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { YouTubePlayer } from '@angular/youtube-player';
 import { RxStompService } from '../rx-stomp.service';
 import { Message } from '@stomp/stompjs';
-import { max, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-video',
   templateUrl: './video.component.html',
   styleUrls: ['./video.component.css']
 })
-export class VideoComponent implements OnInit {
+export class VideoComponent implements OnInit, OnDestroy {
 
   constructor(private rxStompService: RxStompService) { }
 
-  receivedMessage: string = "";
+  receivedMessage: string[] = [];
   src: string = "wTziIhu8yvU";
   newSrc:string = "";
   newTitle:string  = "";
   title:string = "";
   videos: Video[] = [];
   getVid: Boolean = false;
+  message: string = "";
   @ViewChild(YouTubePlayer) youtubePlayer!: YouTubePlayer ;
 
     // @ts-ignore, to suppress warning related to being undefined
   private subscription: Subscription;
 
+  onSendMessage() {
+    const message = this.message;
+    this.rxStompService.publish({ destination: '/topic/operations', body: message });
+  }
+  
   ngOnInit(): void {
     this.subscription = this.rxStompService
-      .watch('/topic/demo')
+      .watch('/topic/operations')
       .subscribe((message: Message) => {
-        this.receivedMessage = message.body;
+        this.receivedMessage.push(message.body);
+        console.log(message.body);
+        
+        this.readMessage();
       });
   }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe();
+  }
+
   onStateChange(event: YT.OnStateChangeEvent): void {
     if (event.data === YT.PlayerState.CUED) {
       const message = "pause";
-      this.rxStompService.publish({destination: 'topic/demo', body: message});
+      this.message = message;
+      this.onSendMessage();
     }
     else if(event.data == YT.PlayerState.PAUSED){
       const message = "pause";
-      this.rxStompService.publish({destination: 'topic/demo', body: message});
+      this.message = message;
+      this.onSendMessage();
     }
     else if(event.data == YT.PlayerState.PLAYING){
       const message = "play";
-      this.rxStompService.publish({destination: 'topic/demo', body: message});
+      this.message = message;
+      this.onSendMessage();
     }
     else if(event.data == YT.PlayerState.ENDED){
       const message = this.src;
-      this.rxStompService.publish({destination: 'topic/demo', body: message});
+      this.message = message;
+      this.onSendMessage();
     }
     else if(event.data == YT.PlayerState.UNSTARTED){
       const message = "pause";
-      this.rxStompService.publish({destination: 'topic/demo', body: message});
+      this.message = message;
+      this.onSendMessage();
     }
     else if(event.data == YT.PlayerState.BUFFERING){
-      const message = "pause";
-      this.rxStompService.publish({destination: 'topic/demo', body: message});
+      const time = this.youtubePlayer.getCurrentTime();
+      const message = "time" + time;
+      this.message = message;
+      this.onSendMessage();
     }
   }
 
   onReady(event: YT.PlayerEvent): void {
     const message = "play";
-    this.rxStompService.publish({destination: 'topic/demo', body: message});
+    this.message = message;
+    this.onSendMessage();
   }
 
   onKey(value: string) {
@@ -94,7 +116,8 @@ export class VideoComponent implements OnInit {
     }
 
     const message = this.src;
-    this.rxStompService.publish({destination: 'topic/demo', body: message});
+    this.message = message;
+    this.onSendMessage();
   }
 
   addToQueu(newTitle: string, newSrc: string){
@@ -107,48 +130,64 @@ export class VideoComponent implements OnInit {
     let videoCount = this.videos.length;
     newVideo.id = videoCount;
     this.videos.push(newVideo);
-    const message = "addVideo";
-    this.rxStompService.publish({destination: 'topic/demo', body: message});
+    const message = "addVideo" + newVideo.src + newVideo.title;
+    console.log(message);
+    this.message = message;
+    this.onSendMessage();
   }
 
   likeVideo(id: number): void{
     var video = this.videos.find(x => x.id == id);
     video!.likes += 1;
+    const message  = "like" + id;
+    this.message = message;
+    this.onSendMessage();
   }
   dislikeVideo(id: number): void{
     var video = this.videos.find(x => x.id == id);
     video!.likes -= 1;
+    const message  = "dislike" + id;
+    this.message = message;
+    this.onSendMessage();
   }
   deleteVideo(id: number):void{
     this.videos.splice(id, 1);
+    const message  = "delete" + id;
+    this.message = message;
+    this.onSendMessage();
   }
 
   readMessage(): void{
-    if(this.receivedMessage == "play"){
+    var length = this.receivedMessage.length - 1;
+    console.log("readMessage   " + this.receivedMessage.length);
+    if(this.receivedMessage[length] == "play"){
       this.youtubePlayer.playVideo();
     }
-    else if(this.receivedMessage == "pause"){
+    else if(this.receivedMessage[length] == "pause"){
       this.youtubePlayer.pauseVideo();
     }
-    else if(this.receivedMessage.includes("like")){
-      const id =  this.receivedMessage.slice(4);
+    else if(this.receivedMessage[length].includes("like")){
+      const id =  this.receivedMessage[length].slice(4);
       this.likeVideo(parseInt(id));
     }
-    else if(this.receivedMessage.includes("dislike")){
-      const id =  this.receivedMessage.slice(7);
+    else if(this.receivedMessage[length].includes("dislike")){
+      const id =  this.receivedMessage[length].slice(7);
       this.dislikeVideo(parseInt(id));
     }
-    else if(this.receivedMessage.includes("delete")){
-      const id =  this.receivedMessage.slice(6);
+    else if(this.receivedMessage[length].includes("delete")){
+      const id =  this.receivedMessage[length].slice(6);
       this.deleteVideo(parseInt(id));
     }
-    else if(this.receivedMessage.includes("addVideo")){
-      const src =  this.receivedMessage.slice(8);
-      const title = this.receivedMessage.slice(8);
+    else if(this.receivedMessage[length].includes("addVideo")){
+      const src =  this.receivedMessage[length].substring(7,18);
+      const title = this.receivedMessage[length].substring(19, this.receivedMessage.length);
       this.addToQueu(title, src);
+    }else if(this.receivedMessage[length].includes("time")){
+      const time = this.receivedMessage[length].slice(4);
+      this.youtubePlayer!.seekTo(Number.parseInt(time), true);
     }
     else{
-      this.src = this.receivedMessage;
+      this.src = this.receivedMessage[length];
     }
   }
 }

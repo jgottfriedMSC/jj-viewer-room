@@ -17,9 +17,10 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.topicSubscription = this.rxStompService
-            .watch('/topic/demo')
+            .watch('/topic/operations')
             .subscribe((message: Message) => {
               this.receivedMessages.push(message.body);
+              console.log("Test")
             });
   }
 
@@ -29,6 +30,6 @@ export class MessagesComponent implements OnInit, OnDestroy {
 
   onSendMessage() {
     const message = `Message generated at ${new Date()}`;
-    this.rxStompService.publish({ destination: '/topic/demo', body: message });
+    this.rxStompService.publish({ destination: '/topic/operations', body: message });
   }
 }

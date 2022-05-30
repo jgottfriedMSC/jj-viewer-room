@@ -4,10 +4,10 @@
     </div>
     <div class="row">
         <div class="ytb">
-            <youtube-player 
-                [videoId]="this.src" 
-                suggestedQuality="highres" 
-                [height]="400" 
+            <youtube-player
+                [videoId]="this.src"
+                suggestedQuality="highres"
+                [height]="400"
                 [width]="700"
                 (stateChange)="onStateChange($event)"
                 (ready)="onReady($event)"
@@ -20,7 +20,7 @@
                     <u class="left" >Title: {{video.title}}    Likes: {{video.likes}}</u>
                     <button (click)="likeVideo(video.id)" class="left">Like</button>
                     <button (click)="dislikeVideo(video.id)" class="left">Dislike</button>
-                    <button (click)="deleteVideo(video.id)" class="left"> Delete Video</button>
+                    <button (click)="deleteVideo(video.id)" class="left" *ngIf="video.id == videos.length - 1">Delete Video</button>
                 </div>
             </div>
         </div>
@@ -29,6 +29,6 @@
         <input width="100" #box placeholder="Insert VideoId" (keyup)="onKey(box.value)"/>
         <input width="100" #box2 placeholder="Insert Title" (keyup)="titleKey(box2.value)"/>
         <button (click)="getNextVideo()">Load new Video</button>
-        <button (click)="addToQueu(this.newTitle, this.newSrc)">Add Video to Queu</button>
+        <button (click)="addToQueue(this.newTitle, this.newSrc)">Add Video to Queue</button>
     </div>
 </div>

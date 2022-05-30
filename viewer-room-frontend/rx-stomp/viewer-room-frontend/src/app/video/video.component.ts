@@ -30,14 +30,14 @@ export class VideoComponent implements OnInit, OnDestroy {
     const message = this.message;
     this.rxStompService.publish({ destination: '/topic/operations', body: message });
   }
-  
+
   ngOnInit(): void {
     this.subscription = this.rxStompService
       .watch('/topic/operations')
       .subscribe((message: Message) => {
         this.receivedMessage.push(message.body);
         console.log(message.body);
-        
+
         this.readMessage();
       });
   }
@@ -89,7 +89,7 @@ export class VideoComponent implements OnInit, OnDestroy {
   onKey(value: string) {
     this.newSrc = value;
   }
-  
+
   titleKey(title :string){
     this.newTitle = title;
   }
@@ -104,7 +104,7 @@ export class VideoComponent implements OnInit, OnDestroy {
         id = video.id;
       }
     }
-    
+
     let video = this.videos.find(x => x.id == id);
 
     if(video != null){
@@ -120,7 +120,22 @@ export class VideoComponent implements OnInit, OnDestroy {
     this.onSendMessage();
   }
 
-  addToQueu(newTitle: string, newSrc: string){
+  addToQueue(newTitle: string, newSrc: string){
+    if(newTitle == "" || newTitle == null || newSrc =="" || newSrc == null){
+      var newVideo = new Video("video title", "wTziIhu8yvU", 0, 0);
+    }
+    else{
+      var newVideo = new Video(newTitle, newSrc, 0, 0);
+    }
+    let videoCount = this.videos.length;
+    newVideo.id = videoCount;
+    const message = "addVideo" + newVideo.src + newVideo.title;
+    console.log(message);
+    this.message = message;
+    this.onSendMessage();
+  }
+
+  addToQueueOnMessage(newTitle: string, newSrc: string){
     if(newTitle == "" || newTitle == null || newSrc =="" || newSrc == null){
       var newVideo = new Video("video title", "wTziIhu8yvU", 0, 0);
     }
@@ -133,28 +148,43 @@ export class VideoComponent implements OnInit, OnDestroy {
     const message = "addVideo" + newVideo.src + newVideo.title;
     console.log(message);
     this.message = message;
-    this.onSendMessage();
   }
 
   likeVideo(id: number): void{
     var video = this.videos.find(x => x.id == id);
-    video!.likes += 1;
     const message  = "like" + id;
     this.message = message;
     this.onSendMessage();
   }
+  likeVideoOnMessage(id: number): void{
+    var video = this.videos.find(x => x.id == id);
+    video!.likes += 1;
+    const message  = "like" + id;
+    this.message = message;
+  }
   dislikeVideo(id: number): void{
     var video = this.videos.find(x => x.id == id);
-    video!.likes -= 1;
     const message  = "dislike" + id;
     this.message = message;
     this.onSendMessage();
   }
+  dislikeVideoOnMessage(id: number): void{
+    var video = this.videos.find(x => x.id == id);
+    if (video!.likes > 0) {
+      video!.likes -= 1;
+      const message  = "dislike" + id;
+      this.message = message;
+    }
+  }
   deleteVideo(id: number):void{
-    this.videos.splice(id, 1);
     const message  = "delete" + id;
     this.message = message;
     this.onSendMessage();
+  }
+  deleteVideoOnMessage(id: number):void{
+    this.videos.splice(id, 1);
+    const message  = "delete" + id;
+    this.message = message;
   }
 
   readMessage(): void{
@@ -166,22 +196,22 @@ export class VideoComponent implements OnInit, OnDestroy {
     else if(this.receivedMessage[length] == "pause"){
       this.youtubePlayer.pauseVideo();
     }
-    else if(this.receivedMessage[length].includes("like")){
-      const id =  this.receivedMessage[length].slice(4);
-      this.likeVideo(parseInt(id));
-    }
     else if(this.receivedMessage[length].includes("dislike")){
       const id =  this.receivedMessage[length].slice(7);
-      this.dislikeVideo(parseInt(id));
+      this.dislikeVideoOnMessage(parseInt(id));
+    }
+    else if(this.receivedMessage[length].includes("like")){
+      const id =  this.receivedMessage[length].slice(4);
+      this.likeVideoOnMessage(parseInt(id));
     }
     else if(this.receivedMessage[length].includes("delete")){
       const id =  this.receivedMessage[length].slice(6);
-      this.deleteVideo(parseInt(id));
+      this.deleteVideoOnMessage(parseInt(id));
     }
     else if(this.receivedMessage[length].includes("addVideo")){
-      const src =  this.receivedMessage[length].substring(7,18);
-      const title = this.receivedMessage[length].substring(19, this.receivedMessage.length);
-      this.addToQueu(title, src);
+      const src =  this.receivedMessage[length].substring(8,19);
+      const title = this.receivedMessage[length].substring(19, this.receivedMessage[length].length);
+      this.addToQueueOnMessage(title, src);
     }else if(this.receivedMessage[length].includes("time")){
       const time = this.receivedMessage[length].slice(4);
       this.youtubePlayer!.seekTo(Number.parseInt(time), true);
@@ -197,7 +227,7 @@ class Video {
   src: string = "";
   id: number = 0;
   likes: number = 0;
-  
+
   constructor(title: string, src: string, id: number, likes: number){
     this.title = title;
     this.src = src;

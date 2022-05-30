@@ -1,4 +1,7 @@
 import { RxStompConfig } from '@stomp/rx-stomp';
+import {v4 as uuidv4} from 'uuid';
+
+const myuuid = uuidv4();
 
 export const myRxStompConfig: RxStompConfig = {
   // Which server?
@@ -7,8 +10,8 @@ export const myRxStompConfig: RxStompConfig = {
   // Headers
   // Typical keys: login, passcode, host
   connectHeaders: {
-    login: 'guest',
-    passcode: 'guest',
+    login: myuuid,
+    passcode: 'test',
   },
 
   // How often to heartbeat?

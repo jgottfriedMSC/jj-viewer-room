@@ -2,18 +2,18 @@ package viewer.room.server.dto;
 
 import viewer.room.server.utils.StringUtils;
 
-public class Message {
+public class OutputMessage {
 
 	private String from;
 	private String text;
 	private String recipient;
 	private String time;
 	
-	public Message() {
+	public OutputMessage() {
 		
 	}
 	
-	public Message(String from, String text, String recipient) {
+	public OutputMessage(String from, String text, String recipient) {
 		this.from = from;
 		this.text = text;
 		this.recipient = recipient;

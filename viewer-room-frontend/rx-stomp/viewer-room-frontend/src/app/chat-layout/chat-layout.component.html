@@ -1,0 +1,31 @@
+<div class="container">
+    <div class="collapse" id="onlineUser">
+        <div class="card card-body">
+            Online Users:
+        </div>
+        <div id="users" *ngFor="let user in this.userList">
+            <span [innerText]="user.username"></span>
+        </div>
+    </div>
+    <div class="collapse" id="chat">
+        <div class="card card-body">
+            <div>
+                Your Username:
+            </div>
+            <div>
+                Your room:
+            </div>
+            <div class="row">
+                <div id="messages" *ngFor="let msg in this.msgList">
+                    <app-message [msg]="this.msg">
+
+                    </app-message>
+                </div>
+            </div>
+            <div class="row">
+                <input width="100" #box (keyup)="onKey(box.value)"/>
+                <button onclick="sendMessage()">Send Message</button>
+            </div>
+        </div>
+    </div>
+</div>
